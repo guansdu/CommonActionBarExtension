@@ -11,14 +11,9 @@ void UEnhancedBoundActionButton::SetRepresentedAction(FUIActionBindingHandle InB
 {
 	AssociatedInputAction = nullptr;
 
-	if (InputActionWidget)
-	{
-		InputActionWidget->SetEnhancedInputAction(nullptr);
-	}
-
 	if (ChordedInputActionWidget)
 	{
-		ChordedInputActionWidget->SetEnhancedInputAction(nullptr);
+		ChordedInputActionWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
 
 	Super::SetRepresentedAction(InBindingHandle);
@@ -26,6 +21,9 @@ void UEnhancedBoundActionButton::SetRepresentedAction(FUIActionBindingHandle InB
 
 void UEnhancedBoundActionButton::SetRepresentEnhancedAction(const UInputAction* InAction)
 {
+	// Clear the previous binding
+	SetRepresentedAction(FUIActionBindingHandle());
+
 	AssociatedInputAction = InAction;
 
 	if (InputActionWidget)

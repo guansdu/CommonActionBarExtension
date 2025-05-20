@@ -16,3 +16,12 @@ void UEnhancedActionBarBPLibrary::RegisterEnhancedAction(const UUserWidget* InWi
 		}
 	}
 }
+
+void UEnhancedActionBarBPLibrary::UnregisterEnhancedAction(const UUserWidget* InWidget, const UInputAction* InAction)
+{
+	if (InWidget && InAction)
+	{
+		UEnhancedActionBarSubsystem* EnhancedActionBarSubsystem = UEnhancedActionBarSubsystem::Get(InWidget->GetOwningLocalPlayer());
+		EnhancedActionBarSubsystem->UnregisterAction(InWidget, InAction);
+	}
+}

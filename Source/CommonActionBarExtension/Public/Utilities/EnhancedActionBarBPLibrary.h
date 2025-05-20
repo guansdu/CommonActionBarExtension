@@ -21,4 +21,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "EnhancedActionBar")
 	static void RegisterEnhancedAction(const UUserWidget* InWidget, const UInputAction* InAction);
+
+	UFUNCTION(BlueprintCallable, Category = "EnhancedActionBar")
+	static void UnregisterEnhancedAction(const UUserWidget* InWidget, const UInputAction* InAction);
 };

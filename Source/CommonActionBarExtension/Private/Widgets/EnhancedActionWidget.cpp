@@ -5,21 +5,22 @@
 
 #include "EnhancedInputSubsystems.h"
 #include "CommonInputSubsystem.h"
+#include "CommonUITypes.h"
 
 FSlateBrush UEnhancedActionWidget::GetIcon() const
 {
-	if (EnhancedInputAction)
+	if (EnhancedInputAction && CommonUI::IsEnhancedInputSupportEnabled())
 	{
 		if (const UEnhancedInputLocalPlayerSubsystem* EnhancedInputSubsystem = GetOwningLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
 		{
 			TArray<FKey> BoundKeys = EnhancedInputSubsystem->QueryKeysMappedToAction(EnhancedInputAction);
 			FSlateBrush SlateBrush;
-
+	
 			const UCommonInputSubsystem* CommonInputSubsystem = GetInputSubsystem();
 			if (CommonInputSubsystem)
 			{
 				ECommonInputType InputType = CommonInputSubsystem->GetCurrentInputType();
-
+	
 				// Remove the keys that are not applicable to the current input type
 				auto KeyFilter = [InputType](const FKey& Key)
 				{
@@ -39,9 +40,9 @@ FSlateBrush UEnhancedActionWidget::GetIcon() const
 				};
 
 				BoundKeys.RemoveAll(KeyFilter);
-
+	
 				FName GamepadName = CommonInputSubsystem->GetCurrentGamepadName();	
-
+	
 				// Pass the key array so that we can get the combined icon brush
 				if (!BoundKeys.IsEmpty()
 					&& UCommonInputPlatformSettings::Get()->TryGetInputBrush(SlateBrush, BoundKeys, InputType, GamepadName))

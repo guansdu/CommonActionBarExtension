@@ -3,6 +3,7 @@
 
 #include "Widgets/EnhancedBoundActionBar.h"
 
+#include "CommonUITypes.h"
 #include "Input/CommonUIActionRouterBase.h"
 #include "Utilities/EnhancedActionBarSubsystem.h"
 #include "Widgets/EnhancedBoundActionButton.h"
@@ -60,6 +61,25 @@ void UEnhancedBoundActionBar::NativeOnEnhancedActionsUpdated()
 	if (EnhancedActionBarSubsystem)
 	{
 		TArray<const UInputAction*> Actions = EnhancedActionBarSubsystem->GatherAllActions();
+
+		auto GetNavBarPriority = [](const UInputAction* InputAction)
+		{
+			if (InputAction)
+			{
+				if (TObjectPtr<const UCommonInputMetadata> InputActionMetadata = CommonUI::GetEnhancedInputActionMetadata(InputAction))
+				{
+					return InputActionMetadata->NavBarPriority;
+				}
+			}
+
+			return 0;
+		};
+
+		Algo::Sort(Actions, [GetNavBarPriority](const UInputAction* A, const UInputAction* B)
+		{
+			return GetNavBarPriority(A) < GetNavBarPriority(B);
+		});
+
 		for (const UInputAction* Action : Actions)
 		{
 			if (Action)
@@ -79,13 +99,22 @@ void UEnhancedBoundActionBar::HandleOnActionsUpdated()
 	if (!bIsPendingRefresh)
 	{
 		bIsPendingRefresh = true;
-		/***
-		 * This is a hacky way to force the action bar to update itself.
-		 * We can't override HandleDeferredDisplayUpdate without modifying the source code.
-		 */
-		if (UCommonUIActionRouterBase* ActionRouter = UCommonUIActionRouterBase::Get(*this))
+
+		FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateWeakLambda(this, [WeakThis = MakeWeakObjectPtr(this)](float InDelta)
 		{
-			ActionRouter->OnBoundActionsUpdated().Broadcast();
-		}
+			if (WeakThis.IsValid())
+			{
+				/***
+				 * This is a hacky way to force the action bar to update itself.
+				 * We can't override HandleDeferredDisplayUpdate without modifying the source code.
+				 */
+				if (UCommonUIActionRouterBase* ActionRouter = UCommonUIActionRouterBase::Get(*WeakThis))
+				{
+					ActionRouter->OnBoundActionsUpdated().Broadcast();
+				}
+			}
+
+			return false;
+		}), 0.1f);
 	}
 }
